@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="A side-by-side comparison of the Japanese and US homepages of Starbucks and 7-Eleven.">
+<title>Two Screens, Two Cultures</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400..600&display=swap">
+<style>
+/* Layout: one narrow reading column; two laptops sit side by side in a wider band. Quiet type, thin rules, two small country dots. */
+:root{
+  --bg:#fdfdfc; --ink:#111111; --grey:rgba(17,17,17,.45); --rule:#efefed; --panel:#ffffff;
+  --jp:#e0313f; --us:#1f7a5c; --chrome:#f6f6f5; --addr:#e9e9e7;
+  --f:"DM Sans",system-ui,-apple-system,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111110; --ink:#ededeb; --grey:rgba(237,237,235,.45); --rule:#242422; --panel:#1b1b1a;
+  --jp:#ff5f6b; --us:#55c79e; --chrome:#232322; --addr:#333331; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111110; --ink:#ededeb; --grey:rgba(237,237,235,.45); --rule:#242422; --panel:#1b1b1a;
+  --jp:#ff5f6b; --us:#55c79e; --chrome:#232322; --addr:#333331; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:450 14px/20px var(--f);letter-spacing:-.006em;-webkit-font-smoothing:antialiased}
+.page{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:88px 72px}
+.col{max-width:560px;margin:0 auto}
+.wide{max-width:1180px;margin:0 auto}
+p{margin:0 0 16px}
+.g{color:var(--grey)}
+a{color:inherit;text-decoration:underline;text-decoration-color:var(--grey);text-underline-offset:3px;text-decoration-thickness:1px}
+a:hover{text-decoration-color:var(--ink)}
+button{font:inherit;color:inherit;letter-spacing:inherit}
+:focus-visible{outline:1.5px solid var(--ink);outline-offset:3px;border-radius:4px}
+.dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:7px;vertical-align:1px}
+.head{margin-bottom:28px}
+
+/* pills */
+.controls{display:flex;justify-content:center;margin:48px auto 32px}
+.opts{display:inline-flex;gap:2px;padding:3px;border-radius:999px;background:var(--rule)}
+.opt{all:unset;cursor:pointer;color:var(--grey);padding:5px 14px;border-radius:999px;transition:color .15s,background-color .2s,box-shadow .2s}
+.opt:hover{color:var(--ink)}
+.opt[aria-pressed="true"]{color:var(--ink);background:var(--panel);box-shadow:0 1px 2px rgba(0,0,0,.08),0 0 0 .5px rgba(0,0,0,.04)}
+.opt:focus-visible{outline:1.5px solid var(--ink);outline-offset:2px}
+
+/* laptops */
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,4vw,56px);align-items:start}
+@media (max-width:760px){.pair{grid-template-columns:1fr;gap:40px}}
+.side{min-width:0}
+.label{display:flex;justify-content:space-between;gap:12px;margin-bottom:12px}
+.label span:last-child{color:var(--grey)}
+.win{border-radius:10px;overflow:hidden;background:var(--panel);border:.5px solid rgba(0,0,0,.14);box-shadow:0 1px 1px rgba(0,0,0,.04),0 12px 40px -8px rgba(0,0,0,.16)}
+.tb{display:grid;grid-template-columns:60px 1fr 60px;align-items:center;height:38px;padding:0 12px;background:var(--chrome);border-bottom:.5px solid rgba(0,0,0,.1)}
+.lights{display:flex;gap:7px}
+.lights i{width:11px;height:11px;border-radius:50%;box-shadow:inset 0 0 0 .5px rgba(0,0,0,.15)}
+.lights i:nth-child(1){background:#ff5f57}.lights i:nth-child(2){background:#febc2e}.lights i:nth-child(3){background:#28c840}
+.addr{justify-self:center;width:min(100%,280px);height:24px;border-radius:7px;background:var(--addr);display:flex;align-items:center;justify-content:center;gap:6px;font-size:12px;color:var(--ink);white-space:nowrap;overflow:hidden}
+.addr svg{width:10px;height:10px;flex:none;opacity:.5}
+.screen{position:relative;aspect-ratio:16/10;max-width:100%;overflow-y:auto;overscroll-behavior:contain;background:#fff;scrollbar-width:none}
+.screen::-webkit-scrollbar{display:none}
+.canvas{position:relative;width:100%;max-width:100%;aspect-ratio:1440/2400}
+.canvas img{display:block;width:100%;height:auto;user-select:none;-webkit-user-drag:none}
+.cap{margin-top:24px;text-align:center;font-size:13px}
+
+/* highlights */
+.box{position:absolute;z-index:5;border:1.5px solid #111;border-radius:5px;box-shadow:0 0 0 1.5px rgba(255,255,255,.85);opacity:0;transition:opacity .25s;pointer-events:none}
+.box.show{opacity:1}
+.box.u{border-style:dashed}
+.pin{position:absolute;z-index:6;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;border:0;padding:0;cursor:pointer;background:#111;color:#fff;font:500 11px/20px var(--f);text-align:center;box-shadow:0 0 0 2px #fff;opacity:0;transform:scale(.5);transition:opacity .2s,transform .25s cubic-bezier(.3,1.5,.5,1);pointer-events:none}
+.pin.show{opacity:1;transform:none;pointer-events:auto}
+.pin:hover{transform:scale(1.12)}
+.note{position:absolute;z-index:40;width:230px;max-width:calc(100% - 16px);background:var(--panel);color:var(--ink);border:1px solid var(--rule);border-radius:8px;padding:9px 11px;box-shadow:0 6px 24px rgba(0,0,0,.14);font-size:12.5px;line-height:17px;opacity:0;transform:translateY(4px);transition:opacity .18s,transform .18s;pointer-events:none}
+.note.open{opacity:1;transform:none;pointer-events:auto}
+.note b{display:block;font-weight:500;margin-bottom:2px}
+.note span{color:var(--grey)}
+.cursor{position:absolute;z-index:12;width:20px;height:20px;margin:-3px 0 0 -4px;pointer-events:none;opacity:0;transition:left .45s cubic-bezier(.4,0,.2,1),top .45s cubic-bezier(.4,0,.2,1),opacity .25s;filter:drop-shadow(0 1px 3px rgba(0,0,0,.35))}
+.cursor.on{opacity:1}
+.trail{position:absolute;inset:0;width:100%;height:100%;z-index:9;pointer-events:none}
+.trail polyline{fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+@media (prefers-reduced-motion:reduce){.cursor{transition:none}}
+
+/* list */
+.list{margin-top:64px}
+.lh{display:grid;grid-template-columns:96px 1fr 1fr;gap:16px;padding-bottom:12px;color:var(--grey)}
+.row{all:unset;box-sizing:border-box;width:100%;cursor:pointer;display:grid;grid-template-columns:96px 1fr 1fr;gap:16px;padding:10px 0;border-top:1px solid var(--rule);transition:color .15s}
+.row .t{color:var(--grey);transition:color .15s}
+.row > span{min-width:0}
+.list.has-active .row:not(.active){color:var(--grey)}
+.row:hover,.row.active{color:var(--ink)!important}
+.row.active .t,.row:hover .t{color:var(--ink)}
+.row:focus-visible{outline:1.5px solid var(--ink);outline-offset:2px}
+.row .t i{font-style:normal;display:inline-block;margin-left:6px;opacity:0;transition:opacity .15s}
+.row.active .t i{opacity:1}
+@media (max-width:520px){.lh,.row{grid-template-columns:72px 1fr 1fr;gap:10px}}
+.num{font-variant-numeric:tabular-nums}
+
+.sec{margin-top:56px}
+.sec h2{font:inherit;color:var(--grey);margin:0 0 12px}
+.src{display:grid;grid-template-columns:1fr auto;gap:16px;padding:10px 0;border-top:1px solid var(--rule)}
+.src span:last-child{color:var(--grey)}
+.end{margin-top:56px;padding-top:24px;border-top:1px solid var(--rule);width:50px}
+.foot{margin-top:24px;color:var(--grey)}
+</style>
+
+</head>
+<body>
+<div class="page">
+  <div class="col head">
+    <div>Japanese vs. American web design</div>
+    <div class="g">Screenshots from Nov 14, 2026</div>
+  </div>
+  <div class="col">
+    <p>Big brands often build their Japanese and American websites in very different ways, even when the products are the same.</p>
+    <p>Below are the real homepages of Starbucks and 7-Eleven in both countries, side by side. Scroll either screen and the other follows. Pick a row in the table to see where each difference shows up.</p>
+  </div>
+
+  <div class="wide">
+    <div class="controls">
+      <div class="opts" role="group" aria-label="Brand">
+        <button class="opt" type="button" data-brand="sbux" aria-pressed="true">Starbucks</button>
+        <button class="opt" type="button" data-brand="711" aria-pressed="false">7-Eleven</button>
+      </div>
+    </div>
+    <div class="pair">
+      <div class="side" data-side="jp">
+        <div class="label"><span><i class="dot" style="background:var(--jp)"></i>Japan</span></div>
+        <div class="win"><div class="tb"><div class="lights"><i></i><i></i><i></i></div><div class="addr"><svg viewBox="0 0 10 12" fill="currentColor"><path d="M2 5V3.5a3 3 0 016 0V5h.5A1.5 1.5 0 0110 6.5v4A1.5 1.5 0 018.5 12h-7A1.5 1.5 0 010 10.5v-4A1.5 1.5 0 011.5 5zm1.5 0h3V3.5a1.5 1.5 0 00-3 0z"/></svg><span class="url"></span></div><span></span></div><div class="screen"><div class="canvas"></div></div></div>
+      </div>
+      <div class="side" data-side="us">
+        <div class="label"><span><i class="dot" style="background:var(--us)"></i>United States</span></div>
+        <div class="win"><div class="tb"><div class="lights"><i></i><i></i><i></i></div><div class="addr"><svg viewBox="0 0 10 12" fill="currentColor"><path d="M2 5V3.5a3 3 0 016 0V5h.5A1.5 1.5 0 0110 6.5v4A1.5 1.5 0 018.5 12h-7A1.5 1.5 0 010 10.5v-4A1.5 1.5 0 011.5 5zm1.5 0h3V3.5a1.5 1.5 0 00-3 0z"/></svg><span class="url"></span></div><span></span></div><div class="screen"><div class="canvas"></div></div></div>
+      </div>
+    </div>
+    <div class="cap g" id="cap">Each window shows what fits on a laptop screen before you scroll.</div>
+  </div>
+
+  <div class="col">
+    <div class="list" id="list">
+      <div class="lh"><span>Difference</span><span><i class="dot" style="background:var(--jp)"></i>Japan</span><span><i class="dot" style="background:var(--us)"></i>US</span></div>
+      <button class="row" type="button" data-k="color"><span class="t">Color<i>←</i></span><span>Bright accents everywhere</span><span>A few big blocks of brand color</span></button>
+      <button class="row" type="button" data-k="type"><span class="t">Text<i>←</i></span><span>Lots of text, tags and dates</span><span>Short headlines, lots of space</span></button>
+      <button class="row" type="button" data-k="hierarchy"><span class="t">Layout<i>←</i></span><span>Many tiles side by side</span><span>One idea per section</span></button>
+      <button class="row" type="button" data-k="nav"><span class="t">Menus<i>←</i></span><span>Many links and shortcuts</span><span>Four or five links</span></button>
+      <button class="row" type="button" data-k="trust"><span class="t">Notices<i>←</i></span><span>Warnings, policies, press news</span><span>Almost none</span></button>
+      <button class="row" type="button" data-k="imagery"><span class="t">Photos<i>←</i></span><span>Many small images and people</span><span>One large product photo</span></button>
+      <button class="row" type="button" data-k="units"><span class="t">Sections<i>←</i></span><span class="num" id="cntJP"></span><span class="num" id="cntUS"></span></button>
+      <button class="row" type="button" data-k="path"><span class="t">Eye path<i>←</i></span><span>Jumps all over the page</span><span>Straight down, top to bottom</span></button>
+    </div>
+
+    <div class="sec">
+      <h2>Why they differ</h2>
+      <p>Japanese shoppers tend to take in a whole page and check the details before they trust a company, so Japanese sites put more on the screen: dates, notices, rankings and many options at once. One survey found that 56% of Japanese customers would switch businesses after a single bad experience.</p>
+      <p>American sites assume people skim. They show one message at a time, with a big photo, a short line and one button, and leave the details for later pages.</p>
+      <p>Color plays a part too. Red reads as bold and positive in Japan, while in the US it more often signals a warning.</p>
+    </div>
+
+    <div class="sec">
+      <h2>Sources</h2>
+      <div class="src"><a href="https://blog.btrax.com/american-japanese-ux-design/" target="_blank" rel="noopener">Differences Between American and Japanese UX Design</a><span>btrax, 2019</span></div>
+      <div class="src"><a href="https://blog.btrax.com/japan-web-design-localization/" target="_blank" rel="noopener">Japanese Website Design Trends</a><span>btrax, 2019</span></div>
+      <div class="src"><span>starbucks.co.jp, starbucks.com, sej.co.jp, 7-eleven.com</span><span>Nov 14, 2026</span></div>
+    </div>
+
+    <div class="end"></div>
+    <div class="foot">Screenshots show the top of each homepage at 1440 px wide, with cookie banners removed. The sites belong to their owners and may have changed since.</div>
+  </div>
+</div>
+
+<script>
+(function(){
+var P={
+ sbux:{
+  jp:{img:'shots/sbux-jp.jpg',url:'starbucks.co.jp',
+   pins:[
+    ['nav',[0,0,600,40],'Header with 3 menus, 5 icons, 2 sub-brands','Starbucks Stories and Starbucks Reserve each keep a permanent slot beside the icons.'],
+    ['type',[20,62,48,252],'Vertical Japanese copy','The tagline runs top to bottom beside an English display word, a layout Latin scripts can’t do.'],
+    ['hierarchy',[0,40,600,300],'Three promos share the first screen','A drink, a rewards campaign and a notice tile split the fold in a mosaic rather than one hero.'],
+    ['color',[300,40,300,148],'Festive red, gold and green','The rewards bingo looks like a poster: saturated color, lights and a bear character.'],
+    ['trust',[300,190,162,150],'“Important notice” gets a hero tile','An announcements tile sits at the same level as the seasonal drink.'],
+    ['type',[17,403,583,160],'Six dated news cards','Each card has a tag such as [新商品情報] (new product info), two or three lines of text and a date.'],
+    ['nav',[185,575,230,55],'Shortcut circles mid-page','Cashless payment and part-time job recruiting get their own round shortcuts.'],
+    ['imagery',[17,745,583,145],'Farmers, baristas and stores','Photos of the people behind the coffee, each with a category and date.'],
+    ['trust',[0,925,600,75],'Notices and press releases','Two dated lists close out the captured page.']],
+   units:[[0,40,298,300],[300,40,300,148],[300,190,162,150],[17,403,93,155],[113,403,93,155],[210,403,93,155],[307,403,93,155],[403,403,93,155],[500,403,95,155],[190,577,50,50],[305,577,50,50],[17,745,93,140],[113,745,93,140],[210,745,93,140],[307,745,93,140],[403,745,93,140],[500,745,95,140],[20,950,280,50],[310,950,285,50]],
+   path:[[25,20],[90,20],[140,20],[430,20],[510,20],[565,20],[42,180],[150,200],[150,310],[380,110],[500,120],[360,265],[60,470],[160,470],[255,470],[350,470],[450,470],[545,470],[215,600],[330,600],[300,705],[60,800],[160,800],[255,800],[350,800],[450,800],[545,800],[160,962],[450,962]]},
+  us:{img:'shots/sbux-us.jpg',url:'starbucks.com',
+   pins:[
+    ['nav',[0,0,600,40],'4 links, store finder, 2 buttons','Sign in and Join now are the only filled actions in the header.'],
+    ['color',[0,42,600,46],'One green band, one action','Brand green with a single outlined button: Start an order.'],
+    ['imagery',[0,100,300,176],'Full-bleed product photo','Half of each band is one large photograph of one product.'],
+    ['type',[330,130,240,110],'Headline, three lines, one button','Short centered copy with generous line height and a single call to action.'],
+    ['hierarchy',[0,100,600,560],'Alternating image and text bands','Each band covers one idea, and image and text swap sides as you scroll.'],
+    ['color',[0,477,600,176],'Large flat color fields','Red and green fill whole half-bands instead of small badges.'],
+    ['trust',[300,853,300,147],'No dates, notices or press','Nothing on the captured page is dated or verified. The brand carries the trust.']],
+   units:[[0,42,600,46],[0,100,600,176],[0,290,600,175],[0,477,600,176],[0,665,600,176],[0,853,600,147]],
+   path:[[25,20],[350,67],[450,148],[450,190],[450,228],[150,336],[150,416],[450,524],[450,604],[150,712],[150,792],[450,888],[450,993]]}},
+ '711':{
+  jp:{img:'shots/711-jp.jpg',url:'sej.co.jp',
+   pins:[
+    ['nav',[0,0,600,44],'Recruiting buttons, utility links, 6 menus','Franchise, property, part-time and career recruiting each get a green button above the main menu.'],
+    ['color',[10,50,580,62],'Three-color slogan at heavy weight','Green, orange and red letters in a bold display face, with exclamation marks.'],
+    ['imagery',[40,105,520,140],'TV-commercial celebrities','Familiar faces from the current TV campaign fill the hero.'],
+    ['trust',[58,283,485,48],'Earthquake notice','A disaster notice sits directly under the hero.'],
+    ['trust',[58,357,485,45],'Phishing and data-breach notices','Warnings about fake emails and an apology about a delivery-service breach, in plain text.'],
+    ['trust',[58,418,485,37],'Customer harassment policy','Even the company’s policy on abusive customers is linked from the homepage.'],
+    ['nav',[20,490,560,185],'Product carousel with ~20 categories','Onigiri, sushi, bento and more, with a dot for each category.'],
+    ['type',[55,710,490,105],'Text baked into images','Campaign tiles carry their own headlines, prices and stamps inside the artwork.'],
+    ['hierarchy',[55,850,490,150],'Reservation grid','Christmas cakes, New Year osechi and gift sets, four per row, each with an order note.']],
+   units:[[0,48,600,195],[0,243,600,25],[58,283,485,48],[58,357,485,45],[58,418,485,37],[30,555,90,90],[150,555,90,90],[262,555,90,90],[370,555,90,90],[480,555,90,90],[58,712,118,90],[180,712,118,90],[302,712,118,90],[424,712,118,90],[58,880,118,90],[180,880,118,90],[302,880,118,90],[424,880,118,90]],
+   path:[[90,10],[220,10],[330,10],[500,10],[90,30],[215,30],[300,30],[380,30],[450,30],[540,30],[300,80],[100,170],[300,170],[500,170],[300,255],[300,307],[150,378],[400,378],[300,437],[300,508],[70,600],[190,600],[310,600],[420,600],[520,600],[115,757],[240,757],[360,757],[485,757],[300,857],[115,930],[240,930],[360,930],[485,930]]},
+  us:{img:'shots/711-us.jpg',url:'7-eleven.com',
+   pins:[
+    ['trust',[0,0,600,14],'One-line SNAP/EBT notice','The only notice on the captured page is a single line about accepted payment.'],
+    ['nav',[0,15,600,33],'5 links, store finder, account','Food, Drinks, rewards, delivery and merch in one row.'],
+    ['type',[20,140,150,130],'Condensed headline, one button','Big condensed type, a short paragraph and a single Learn More button.'],
+    ['imagery',[180,48,420,310],'One large food photo','The hero is a single dish on a flat yellow field.'],
+    ['color',[0,360,600,185],'One campaign per color band','A blue band holds one campaign with one button.'],
+    ['hierarchy',[20,590,560,200],'Two offers, two buttons','Delivery and rewards side by side, each with one plain call to action.']],
+   units:[[0,0,600,14],[0,48,600,310],[0,360,600,185],[22,590,265,195],[312,590,265,195]],
+   path:[[25,30],[150,30],[90,170],[90,215],[55,255],[390,250],[130,430],[65,487],[155,700],[155,775],[445,700],[445,775]]}}
+};
+
+var FOLD=375;
+var $=function(id){return document.getElementById(id)};
+var RM=matchMedia('(prefers-reduced-motion: reduce)').matches;
+var S={brand:'sbux',k:null,playing:false},timers=[];
+var V={};
+['jp','us'].forEach(function(s){var el=document.querySelector('.side[data-side="'+s+'"]');V[s]={el:el,screen:el.querySelector('.screen'),canvas:el.querySelector('.canvas'),url:el.querySelector('.url')}});
+function pc(v,d){return (v/d*100)+'%'}
+function place(el,r){el.style.left=pc(r[0],600);el.style.top=pc(r[1],1000);el.style.width=pc(r[2],600);el.style.height=pc(r[3],1000)}
+
+function build(){
+  stop();hideNotes();
+  ['jp','us'].forEach(function(side){
+    var d=P[S.brand][side],c=V[side].canvas;
+    c.innerHTML='<img alt="'+d.url+' homepage" src="'+d.img+'" width="1440" height="2400">'+
+      '<svg class="trail" viewBox="0 0 600 1000" preserveAspectRatio="none"><polyline points=""/></svg>'+
+      '<svg class="cursor" viewBox="0 0 24 24"><path d="M4 2l15 9-7 1.6L8.6 20z" fill="#111" stroke="#fff" stroke-width="1.6" stroke-linejoin="round"/></svg>'+
+      '<div class="note" role="status"></div>';
+    d.pins.forEach(function(p,i){
+      var bx=document.createElement('div');bx.className='box';bx.dataset.k=p[0];place(bx,p[1]);c.appendChild(bx);
+      var pin=document.createElement('button');pin.type='button';pin.className='pin';pin.dataset.k=p[0];
+      pin.style.left=pc(Math.min(Math.max(p[1][0]+13,13),587),600);pin.style.top=pc(Math.max(p[1][1]+13,13),1000);
+      pin.textContent=i+1;pin.setAttribute('aria-label',p[2]);
+      pin.addEventListener('click',function(e){e.stopPropagation();showNote(side,p,pin)});
+      c.appendChild(pin);
+    });
+    d.units.forEach(function(r){var u=document.createElement('div');u.className='box u';u.dataset.k='units';place(u,r);c.appendChild(u)});
+    V[side].url.textContent=d.url;
+    V[side].screen.scrollTop=0;
+  });
+  var cj=P[S.brand].jp.units,cu=P[S.brand].us.units;
+  $('cntJP').textContent=cj.length+' sections, '+cj.filter(function(r){return r[1]<FOLD}).length+' on first screen';
+  $('cntUS').textContent=cu.length+' sections, '+cu.filter(function(r){return r[1]<FOLD}).length+' on first screen';
+  apply();
+}
+
+function apply(){
+  var k=S.k;
+  document.querySelectorAll('.box').forEach(function(b){b.classList.toggle('show',!!k&&b.dataset.k===k)});
+  document.querySelectorAll('.pin').forEach(function(b){b.classList.toggle('show',!!k&&k!=='units'&&k!=='path'&&b.dataset.k===k)});
+  document.querySelectorAll('.row').forEach(function(r){r.classList.toggle('active',r.dataset.k===k);r.setAttribute('aria-pressed',r.dataset.k===k)});
+  $('list').classList.toggle('has-active',!!k);
+  var cap={units:'Each outline is one separate section. Scroll the windows to count them all.',path:'Watch where the eye goes on each page.'}[k];
+  $('cap').textContent=cap||(k?'Click a numbered dot for details. Scroll to find more.':'Each window shows what fits on a laptop screen before you scroll.');
+  S.user=null;
+  if(k&&k!=='path'&&k!=='units'){ // scroll each screen to its first highlight
+    ['jp','us'].forEach(function(s){var ys=P[S.brand][s].pins.filter(function(p){return p[0]===k}).map(function(p){return p[1][1]});
+      var top=ys.length?Math.max(0,Math.min.apply(null,ys)/1000*V[s].canvas.clientHeight-20):0;
+      V[s].screen.scrollTo({top:top,behavior:RM?'auto':'smooth'});});
+  }
+}
+
+/* notes */
+function showNote(side,p,pin){
+  hideNotes();
+  var c=V[side].canvas,n=c.querySelector('.note');
+  n.innerHTML='<b></b><span></span>';n.firstChild.textContent=p[2];n.lastChild.textContent=p[3];
+  var cw=c.clientWidth,x=pin.offsetLeft,y=pin.offsetTop,w=Math.min(230,cw-16),l=x+16;
+  if(l+w>cw-8)l=Math.max(8,x-w-16);
+  n.style.left=l+'px';n.style.top=(y-6)+'px';n.classList.add('open');
+}
+function hideNotes(){document.querySelectorAll('.note').forEach(function(n){n.classList.remove('open')})}
+document.addEventListener('click',function(e){if(!e.target.closest('.note'))hideNotes()});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')hideNotes()});
+
+/* synced scrolling */
+var lock=false;
+['jp','us'].forEach(function(s){var o=s==='jp'?'us':'jp';
+  ['wheel','touchstart','pointerdown','keydown'].forEach(function(ev){V[s].screen.addEventListener(ev,function(){S.user=s},{passive:true})});
+  V[s].screen.addEventListener('scroll',function(){
+    if(lock||S.playing||S.user!==s)return;
+    var a=V[s].screen,b=V[o].screen,r=a.scrollTop/Math.max(1,a.scrollHeight-a.clientHeight);
+    lock=true;b.scrollTop=r*(b.scrollHeight-b.clientHeight);requestAnimationFrame(function(){lock=false});
+  },{passive:true});
+});
+
+/* eye path: both sides play at once */
+function stop(){S.playing=false;timers.forEach(clearTimeout);timers=[];
+  document.querySelectorAll('.cursor').forEach(function(c){c.classList.remove('on')});
+  document.querySelectorAll('.trail polyline').forEach(function(p){p.setAttribute('points','')})}
+function play(){
+  stop();S.playing=true;hideNotes();var done=0;
+  ['jp','us'].forEach(function(side){
+    var pts=P[S.brand][side].path,c=V[side].canvas,scr=V[side].screen,cur=c.querySelector('.cursor'),pl=c.querySelector('.trail polyline'),acc=[],i=0;
+    pl.style.stroke=side==='jp'?'var(--jp)':'var(--us)';scr.scrollTo({top:0,behavior:RM?'auto':'smooth'});
+    var gap=RM?220:(side==='jp'?320:620);
+    function step(){
+      if(!S.playing)return;
+      if(i>=pts.length){if(++done===2){S.playing=false;timers.push(setTimeout(function(){cur.classList.remove('on');V.jp.canvas.querySelector('.cursor').classList.remove('on')},1200))}return}
+      var p=pts[i],cw=c.clientWidth,ch=c.clientHeight;
+      cur.style.left=(p[0]/600*cw)+'px';cur.style.top=(p[1]/1000*ch)+'px';cur.classList.add('on');
+      acc.push(p[0]+','+p[1]);pl.setAttribute('points',acc.join(' '));
+      var y=p[1]/1000*ch;if(y<scr.scrollTop+30||y>scr.scrollTop+scr.clientHeight-30)scr.scrollTo({top:y-scr.clientHeight/2,behavior:RM?'auto':'smooth'});
+      i++;timers.push(setTimeout(step,gap));
+    }
+    timers.push(setTimeout(step,500));
+  });
+}
+
+/* wiring */
+document.querySelectorAll('[data-brand]').forEach(function(b){b.addEventListener('click',function(){
+  S.brand=b.dataset.brand;document.querySelectorAll('[data-brand]').forEach(function(x){x.setAttribute('aria-pressed',x===b)});build()})});
+document.querySelectorAll('.row').forEach(function(r){r.addEventListener('click',function(e){
+  e.stopPropagation();var k=r.dataset.k;hideNotes();stop();
+  S.k=(S.k===k&&k!=='path')?null:k;apply();
+  if(k==='path')play();
+})});
+addEventListener('resize',hideNotes);
+build();
+})();
+</script>
+
+</body>
+</html>
